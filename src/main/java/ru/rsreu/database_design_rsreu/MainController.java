@@ -9,15 +9,19 @@ import ru.rsreu.database_design_rsreu.model.UserRoleEnum;
 import ru.rsreu.database_design_rsreu.model.UserStatusEnum;
 import ru.rsreu.database_design_rsreu.repository.UserRepository;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Controller
 public class MainController {
+    private final UserRepository userRepository;
+
     @Autowired
-    private UserRepository userRepository;
+    public MainController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @GetMapping("/")
     public String get(Model model) {
         userRepository.save(new User(null, UserRoleEnum.USER, UserStatusEnum.ONLINE, "Steve"));
