@@ -31,8 +31,17 @@ public class JdbcTemplate implements JdbcOperations {
 
     @Override
     public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... params) {
-        ResultSet resultSet = executeDqlQuery(sql, params);
-        return mapResultSet(resultSet, rowMapper);
+        return executeDqlQuery(sql, rowMapper, params);
+    }
+
+    private <T> List<T> executeDqlQuery(String sql, RowMapper<T> rowMapper, Object[] params) {
+        try (PreparedStatement preparedStatement = getPreparedStatement(sql)) {
+            prepareStatementWithParams(preparedStatement, params);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return mapResultSet(resultSet, rowMapper);
+        } catch (SQLException exception) {
+            throw new JdbcQueryExecutionException("Ошибка при выполнении запроса", exception);
+        }
     }
 
     @Override
@@ -41,21 +50,9 @@ public class JdbcTemplate implements JdbcOperations {
     }
 
     private int executeDmlQuery(String sql, Object... params) {
-        PreparedStatement statement = getPreparedStatement(sql);
-        prepareStatementWithParams(statement, params);
-        try {
+        try (PreparedStatement statement = getPreparedStatement(sql)) {
+            prepareStatementWithParams(statement, params);
             return statement.executeUpdate();
-        } catch (SQLException exception) {
-            throw new JdbcQueryExecutionException("Ошибка при выполнении запроса", exception);
-        }
-
-    }
-
-    private ResultSet executeDqlQuery(String sql, Object... params) {
-        PreparedStatement statement = getPreparedStatement(sql);
-        prepareStatementWithParams(statement, params);
-        try {
-            return statement.executeQuery();
         } catch (SQLException exception) {
             throw new JdbcQueryExecutionException("Ошибка при выполнении запроса", exception);
         }
