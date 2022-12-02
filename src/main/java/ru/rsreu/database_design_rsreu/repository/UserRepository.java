@@ -23,8 +23,8 @@ public class UserRepository {
     private static User mapUser(ResultSet rs) throws SQLException {
         return new User(
                 rs.getLong(1),
-                Enum.valueOf(UserRoleEnum.class, rs.getString(2)),
-                Enum.valueOf(UserStatusEnum.class, rs.getString(3)),
+                UserRoleEnum.getRoleById(rs.getInt(2)),
+                UserStatusEnum.getStatusById(rs.getInt(3)),
                 rs.getString(4)
         );
     }
@@ -42,6 +42,6 @@ public class UserRepository {
 
     public void save(User user) {
         jdbcTemplate.update("insert into system_user values (default, ?, ?, ?)",
-                user.getUserRoleEnum().toString(), user.getUserStatusEnum().toString(), user.getName());
+                user.getUserRoleEnum().getId(), user.getUserStatusEnum().getId(), user.getName());
     }
 }
