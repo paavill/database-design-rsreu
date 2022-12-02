@@ -40,7 +40,13 @@ public class MainController {
 
     @PostMapping("/getByName")
     public String getByName(Model model, UserByNameDto userByNameDto) {
-        prepareModelWithUsersTable(model, userRepository.findByName(userByNameDto.getName()));
+        List<User> result;
+        if (userByNameDto.getName().isBlank()) {
+            result = userRepository.findAll();
+        } else {
+            result = userRepository.findByName(userByNameDto.getName());
+        }
+        prepareModelWithUsersTable(model, result);
         return "getByName";
     }
 
