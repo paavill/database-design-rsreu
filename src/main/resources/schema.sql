@@ -2,67 +2,71 @@ DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
 create table if not exists user_role (
-    title varchar primary key
+    id serial  primary key,
+    title varchar unique
 );
 
 create table if not exists user_status (
-    title varchar primary key
+    id serial primary key ,
+    title varchar unique
 );
 
 create table if not exists system_user (
     id serial primary key,
-    role_title varchar not null ,
-    status_title varchar not null ,
+    role int not null ,
+    status int not null ,
     name varchar not null ,
 
     constraint fk_role_title
-        FOREIGN KEY (role_title)
-            REFERENCES user_role(title),
+        FOREIGN KEY (role)
+            REFERENCES user_role(id),
     constraint fk_status_title
-        FOREIGN KEY (status_title)
-            REFERENCES user_status(title)
+        FOREIGN KEY (status)
+            REFERENCES user_status(id)
 );
 
 create table if not exists order_status (
-    title varchar primary key
+    id serial primary key ,
+    title varchar unique
 );
 
 create table if not exists order_list(
     id serial primary key ,
     user_id int not null ,
-    status_title varchar not null ,
+    status int not null ,
     constraint fk_order_user_id
         foreign key (user_id)
             references system_user(id),
     constraint fk_order_status
-        foreign key (status_title)
-            references order_status(title)
+        foreign key (status)
+            references order_status(id)
 );
 
 create table if not exists kitchen_worker_status(
-    title varchar primary key
+    id serial primary key ,
+    title varchar unique
 );
 
 create table if not exists kitchen_type (
-    title varchar primary key
+    id serial primary key,
+    title varchar unique
 );
 
 create table if not exists kitchen (
     id serial primary key,
-    type_title varchar not null ,
+    type int not null ,
     constraint fk_kitchen_kitchen_type
-        foreign key (type_title)
-            references kitchen_type(title)
+        foreign key (type)
+            references kitchen_type(id)
 );
 
 create table if not exists kitchen_worker(
-    kitchen_id int,
-    user_id int not null ,
-    status varchar not null ,
-    primary key (kitchen_id, user_id),
+    user_id int primary key ,
+    kitchen_id int not null unique,
+    status int not null ,
     constraint fk_kitchen_worker_kitchen_worker_status
         foreign key (status)
-            references kitchen_worker_status(title),
+            references kitchen_worker_status(id),
     constraint fk_kitchen_worker_user_id
         foreign key (user_id)
             references system_user(id),
@@ -72,21 +76,22 @@ create table if not exists kitchen_worker(
 );
 
 create table if not exists product(
-    title varchar primary key ,
-    kitchen_producer_type_title varchar not null ,
+    id serial primary key ,
+    title varchar unique ,
+    kitchen_producer_type_id int not null ,
     constraint fk_product_kitchen_type
-        foreign key (kitchen_producer_type_title)
-            references kitchen_type(title)
+        foreign key (kitchen_producer_type_id)
+            references kitchen_type(id)
 );
 
 create table if not exists basket (
     order_id int,
-    product_name varchar not null ,
-    primary key (order_id, product_name),
+    product_id int not null ,
+    primary key (order_id, product_id),
     constraint fk_basket_order_id
         foreign key (order_id)
             references order_list(id),
     constraint fk_basket_product
-        foreign key (product_name)
-            references product(title)
+        foreign key (product_id)
+            references product(id)
 )
