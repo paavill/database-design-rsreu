@@ -7,6 +7,8 @@ import ru.rsreu.database_design_rsreu.model.User;
 import ru.rsreu.database_design_rsreu.model.UserRoleEnum;
 import ru.rsreu.database_design_rsreu.model.UserStatusEnum;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @Component
@@ -18,15 +20,24 @@ public class UserRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    private static User mapUser(ResultSet rs) throws SQLException {
+        return new User(
+                rs.getLong(1),
+                Enum.valueOf(UserRoleEnum.class, rs.getString(2)),
+                Enum.valueOf(UserStatusEnum.class, rs.getString(3)),
+                rs.getString(4)
+        );
+    }
+
+    public List<User> findByName(String name) {
+        return jdbcTemplate.query("select * from system_user where name = ?",
+                (set, rowNumber) -> mapUser(set), name);
+    }
+
     public List<User> findAll() {
         return jdbcTemplate.query("select * from system_user",
                 (rs, rowNum) ->
-                        new User(
-                                rs.getLong(1),
-                                Enum.valueOf(UserRoleEnum.class, rs.getString(2)),
-                                Enum.valueOf(UserStatusEnum.class, rs.getString(3)),
-                                rs.getString(4)
-                        ));
+                        mapUser(rs));
     }
 
     public void save(User user) {
