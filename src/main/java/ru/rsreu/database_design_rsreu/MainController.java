@@ -1,10 +1,12 @@
 package ru.rsreu.database_design_rsreu;
 
+import oracle.jdbc.proxy.annotation.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.rsreu.database_design_rsreu.dto.UserByNameDto;
 import ru.rsreu.database_design_rsreu.model.User;
 import ru.rsreu.database_design_rsreu.model.UserRoleEnum;
@@ -29,6 +31,8 @@ public class MainController {
     public String get(Model model) {
         userRepository.save(new User(null, UserRoleEnum.USER, UserStatusEnum.ONLINE, "Steve"));
         prepareModelWithUsersTable(model, userRepository.findAll());
+        model.addAttribute("totalCount", userRepository.getCount());
+        model.addAttribute("onlineCount", userRepository.getOnlineCount());
         return "home";
     }
 
@@ -48,6 +52,17 @@ public class MainController {
         }
         prepareModelWithUsersTable(model, result);
         return "getByName";
+    }
+
+    @GetMapping("/insert")
+    public String getInsertPage() {
+        return "insert";
+    }
+
+    @PostMapping("/insert")
+    public String insert(@RequestParam String username) {
+        userRepository.insert(username);
+        return "redirect:/";
     }
 
     private void prepareModelWithUsersTable(Model model, List<User> userRepository) {
